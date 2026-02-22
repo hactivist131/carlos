@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Ultimate Android Hack Simulator</title>
+<style>
+html, body{
+    margin:0;
+    padding:0;
+    width:100%;
+    height:100%;
+    overflow:hidden;
+    background:black;
+    font-family:monospace;
+    color:red; /* terminal text red */
+}
+canvas{
+    position:fixed;
+    top:0;
+    left:0;
+    z-index:0;
+}
+#terminal{
+    position:relative;
+    z-index:3;
+    padding:15px;
+    white-space:pre-line;
+    font-size:14px;
+    line-height:1.4em;
+}
+.notification{
+    position:fixed;
+    right:10px;
+    top:10px;
+    background:#111;
+    color:red; /* notifications red */
+    padding:8px 15px;
+    border-radius:10px;
+    box-shadow:0 0 10px red;
+    z-index:4;
+    opacity:0;
+    transition:opacity 0.3s;
+    font-size:14px;
+}
+#countdown{
+    position:fixed;
+    top:5px;
+    left:50%;
+    transform:translateX(-50%);
+    font-size:22px;
+    color:red;
+    z-index:4;
+}
+#gps{
+    position:fixed;
+    bottom:10px;
+    left:50%;
+    transform:translateX(-50%);
+    width:250px;
+    height:160px;
+    background:#111;
+    border:2px solid red;
+    border-radius:8px;
+    z-index:4;
+    font-size:12px;
+    padding:5px;
+    box-sizing:border-box;
+}
+#camera{
+    position:fixed;
+    top:40px;
+    right:20px;
+    width:160px;
+    height:120px;
+    background:#111;
+    border:2px solid red;
+    border-radius:8px;
+    z-index:4;
+}
+#passwordPrompt{
+    position:fixed;
+    top:50%;
+    left:50%;
+    transform:translate(-50%,-50%);
+    color:red;
+    font-size:22px;
+    text-align:center;
+    z-index:10;
+}
+input{
+    padding:8px;
+    font-size:16px;
+    border-radius:6px;
+    border:none;
+}
+button{
+    padding:8px 12px;
+    font-size:16px;
+    margin-left:8px;
+    border-radius:6px;
+    border:none;
+    cursor:pointer;
+    background:#111;
+    color:red;
+}
+</style>
+</head>
+<body>
+
+<div id="passwordPrompt">
+    <p>Enter password to continue:</p>
+    <input type="password" id="passInput" placeholder="Password">
+    <button onclick="checkPassword()">Enter</button>
+    <p id="error" style="color:red;"></p>
+</div>
+
+<canvas id="matrix"></canvas>
+<div id="terminal" style="display:none;"></div>
+<div id="countdown" style="display:none;"></div>
+<div id="gps" style="display:none;"></div>
+<div id="camera" style="display:none;"></div>
+
+<audio id="hackSound">
+<source src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_ef0b0e5c60.mp3?filename=whoosh-6316.mp3">
+</audio>
+
+<script>
+const password="1234";
+function checkPassword(){
+    const input=document.getElementById("passInput").value;
+    if(input===password){
+        document.getElementById("passwordPrompt").style.display="none";
+        startPrank();
+    }else{
+        document.getElementById("error").innerText="Incorrect password!";
+    }
+}
+
+function startPrank(){
+    document.getElementById("terminal").style.display="block";
+    document.getElementById("countdown").style.display="block";
+    document.getElementById("gps").style.display="block";
+    document.getElementById("camera").style.display="block";
+
+    // MATRIX BACKGROUND
+    const canvas=document.getElementById('matrix');
+    const ctx=canvas.getContext('2d');
+    canvas.width=window.innerWidth;
+    canvas.height=window.innerHeight;
+    const letters="ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()-_=+<>?".split("");
+    const fontSize=14;
+    const columns=canvas.width/fontSize;
+    const drops=[];
+    for(let x=0;x<columns;x++) drops[x]=Math.random()*canvas.height;
+
+    function drawMatrix(){
+        ctx.fillStyle="rgba(0,0,0,0.15)";
+        ctx.fillRect(0,0,canvas.width,canvas.height);
+        ctx.fillStyle="red"; // matrix letters red
+        ctx.font=fontSize+"px monospace";
+        for(let i=0;i<drops.length;i++){
+            const text=letters[Math.floor(Math.random()*letters.length)];
+            ctx.fillText(text,i*fontSize,drops[i]);
+            drops[i]+=fontSize;
+            if(drops[i]>canvas.height && Math.random()>0.975) drops[i]=0;
+        }
+        requestAnimationFrame(drawMatrix);
+    }
+    drawMatrix();
+
+    // TERMINAL LINES
+    const terminal=document.getElementById("terminal");
+    const lines=[
+        "Initializing secure shell...",
+        "Bypassing firewall...",
+        "Accessing Android kernel...",
+        "Decrypting user data...",
+        "Locating camera feed...",
+        "Extracting contacts...",
+        "Injecting root exploit...",
+        "Cloning apps...",
+        "Overriding admin permissions...",
+        "Accessing private messages...",
+        "Uploading payload...",
+        "Tracking GPS location...",
+        "Finalizing system takeover...",
+        "ACCESS GRANTED! 😎"
+    ];
+    let i=0;
+
+    // FAKE NOTIFICATIONS
+    function showNotification(msg){
+        const note=document.createElement("div");
+        note.className="notification";
+        note.innerText="SYSTEM: "+msg;
+        document.body.appendChild(note);
+        setTimeout(()=>{note.style.opacity=1;},100);
+        setTimeout(()=>{note.style.opacity=0;},1500);
+        setTimeout(()=>{note.remove();},2000);
+    }
+
+    // GPS ANIMATION
+    const gps=document.getElementById("gps");
+    function moveGPS(){
+        const x=Math.random()*(window.innerWidth-260);
+        const y=Math.random()*(window.innerHeight-180);
+        gps.innerHTML="📍 Lat: "+(Math.random()*90).toFixed(4)+" N<br>📍 Lon: "+(Math.random()*180).toFixed(4)+" E";
+        gps.style.left=x+"px";
+        gps.style.top=y+"px";
+        setTimeout(moveGPS,800);
+    }
+    moveGPS();
+
+    // CAMERA FLASH
+    const camera=document.getElementById("camera");
+    function flashCamera(){
+        camera.style.background=camera.style.background=="red"?"#111":"red";
+        setTimeout(flashCamera,500);
+    }
+    flashCamera();
+
+    // TYPE TERMINAL
+    function typeLine(){
+        if(i<lines.length){
+            terminal.innerHTML+="> "+lines[i]+"\n";
+            showNotification(lines[i]);
+            document.getElementById("hackSound").play();
+            i++;
+            setTimeout(typeLine,1800);
+        }else{
+            countdown(10);
+        }
+    }
+    typeLine();
+
+    // COUNTDOWN
+    const countdownEl=document.getElementById("countdown");
+    const fireworks=[];
+    function countdown(sec){
+        if(sec>=0){
+            countdownEl.innerText="🚨 System Overload in "+sec+"s 🚨";
+            setTimeout(()=>countdown(sec-1),1000);
+        }else{
+            launchFireworks();
+            terminal.innerHTML+="\n💥 SYSTEM OVERLOAD! 💥\n😂 Just a harmless prank!";
+            countdownEl.style.display="none";
+        }
+    }
+
+    // FIREWORKS
+    function launchFireworks(){
+        const cw=canvas.width;
+        const ch=canvas.height;
+        for(let i=0;i<300;i++){
+            fireworks.push({
+                x:cw/2,
+                y:ch/2,
+                dx:(Math.random()-0.5)*15,
+                dy:(Math.random()-0.5)*15,
+                life:60,
+                color:`hsl(${Math.random()*360},100%,50%)`
+            });
+        }
+        animateFireworks();
+    }
+    function animateFireworks(){
+        fireworks.forEach((f,i)=>{
+            ctx.fillStyle=f.color;
+            ctx.beginPath();
+            ctx.arc(f.x,f.y,3,0,Math.PI*2);
+            ctx.fill();
+            f.x+=f.dx;
+            f.y+=f.dy;
+            f.life--;
+            if(f.life<=0) fireworks.splice(i,1);
+        });
+        if(fireworks.length>0) requestAnimationFrame(animateFireworks);
+    }
+}
+</script>
+</body>
+</html>
